@@ -1,0 +1,918 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>عيادة الحلواني لطب الأطفال</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<style>
+:root {
+  --primary:#087f8c;
+  --primary-dark:#06636e;
+  --bg:#f3f7f8;
+  --white:#fff;
+  --text:#243746;
+  --muted:#718096;
+  --border:#e3eaed;
+  --red:#dc3545;
+  --green:#15966b;
+  --shadow:0 5px 20px rgba(30,70,80,.06);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;background:var(--bg);color:var(--text);
+  font-family:'Cairo',sans-serif;
+}
+button,input,select,textarea{font-family:inherit}
+button{cursor:pointer}
+.hidden{display:none!important}
+.login-screen{
+  min-height:100vh;display:flex;align-items:center;
+  justify-content:center;padding:20px;
+  background:linear-gradient(135deg,#087f8c,#50b9b0);
+}
+.login-card{
+  width:100%;max-width:420px;background:white;
+  padding:35px;border-radius:22px;box-shadow:var(--shadow);
+}
+.login-logo{
+  width:70px;height:70px;background:#e2f6f4;color:var(--primary);
+  display:grid;place-items:center;border-radius:20px;
+  font-size:32px;margin:0 auto 15px;
+}
+.login-card h1{text-align:center;font-size:23px;margin:0}
+.login-card p{text-align:center;color:var(--muted);margin:5px 0 25px}
+.field{margin-bottom:15px}
+.field label{display:block;font-weight:700;font-size:14px;margin-bottom:6px}
+.field input,.field select,.field textarea{
+  width:100%;padding:12px;border:1px solid var(--border);
+  border-radius:10px;background:#fff;outline:none;font-size:14px;
+}
+.field input:focus,.field select:focus,.field textarea:focus{
+  border-color:var(--primary);
+}
+.btn{
+  border:0;border-radius:10px;padding:11px 18px;
+  background:var(--primary);color:#fff;font-weight:700;
+}
+.btn:hover{background:var(--primary-dark)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.btn-light{background:#e8f5f5;color:var(--primary)}
+.btn-danger{background:#fff0f0;color:var(--red)}
+.btn-small{padding:7px 12px;font-size:12px}
+.layout{display:flex;min-height:100vh}
+.sidebar{
+  width:250px;background:#fff;border-left:1px solid var(--border);
+  padding:22px 15px;position:fixed;right:0;top:0;bottom:0;
+  overflow:auto;z-index:5;
+}
+.brand{display:flex;align-items:center;gap:10px;padding:5px 10px 25px}
+.brand-icon{
+  width:45px;height:45px;border-radius:14px;
+  background:#e2f6f4;color:var(--primary);
+  display:grid;place-items:center;font-size:24px;
+}
+.brand h2{font-size:15px;margin:0}
+.brand small{color:var(--muted)}
+.nav-title{font-size:11px;color:#9aa8b3;padding:12px}
+.nav-btn{
+  width:100%;display:flex;gap:12px;align-items:center;
+  padding:12px;border:0;background:transparent;color:#647582;
+  border-radius:10px;text-align:right;margin-bottom:4px;font-size:14px;
+}
+.nav-btn:hover,.nav-btn.active{
+  background:#e8f5f5;color:var(--primary);font-weight:700;
+}
+.nav-icon{font-size:18px;width:22px;text-align:center}
+.sidebar-bottom{
+  border-top:1px solid var(--border);margin-top:25px;padding-top:15px;
+}
+.main{margin-right:250px;width:calc(100% - 250px);padding:25px}
+.topbar{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:25px;gap:15px;flex-wrap:wrap;
+}
+.topbar h1{font-size:23px;margin:0}
+.topbar p{margin:3px 0;color:var(--muted);font-size:13px}
+.user-pill{
+  background:#fff;border:1px solid var(--border);
+  padding:9px 14px;border-radius:12px;font-size:13px;
+}
+.stats{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:15px;margin-bottom:22px;
+}
+.stat{
+  background:white;border:1px solid var(--border);
+  border-radius:15px;padding:18px;box-shadow:var(--shadow);
+}
+.stat-icon{
+  width:40px;height:40px;border-radius:12px;
+  background:#e8f5f5;display:grid;place-items:center;font-size:20px;
+}
+.stat h3{font-size:25px;margin:10px 0 0}
+.stat p{color:var(--muted);font-size:13px;margin:0}
+.panel{
+  background:#fff;border:1px solid var(--border);
+  border-radius:15px;padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow);
+}
+.panel-head{
+  display:flex;justify-content:space-between;align-items:center;
+  gap:10px;flex-wrap:wrap;margin-bottom:16px;
+}
+.panel-head h2{font-size:17px;margin:0}
+.toolbar{display:flex;gap:10px;flex-wrap:wrap}
+.search{
+  border:1px solid var(--border);border-radius:9px;
+  padding:10px 12px;min-width:220px;outline:none;
+}
+.table-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:650px}
+th,td{
+  padding:12px;text-align:right;border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+th{color:#718096;background:#f8fafb;font-weight:700}
+td{color:#34495e}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.tag{
+  display:inline-block;padding:4px 9px;border-radius:20px;
+  background:#e8f5f5;color:var(--primary);font-size:11px;
+}
+.tag.green{background:#e6f7ef;color:#15966b}
+.tag.orange{background:#fff4df;color:#ad7614}
+.tag.red{background:#fff0f0;color:#dc3545}
+.page{display:none}
+.page.active{display:block}
+.form-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;
+}
+.form-grid .field{margin:0}
+.full{grid-column:1/-1}
+.notice{
+  padding:12px 15px;border-radius:10px;background:#e8f5f5;
+  color:var(--primary);font-size:13px;margin-bottom:15px;
+}
+.modal{
+  position:fixed;inset:0;background:rgba(15,35,45,.55);
+  z-index:100;display:flex;align-items:center;justify-content:center;
+  padding:15px;overflow:auto;
+}
+.modal-card{
+  width:100%;max-width:520px;background:white;border-radius:17px;
+  padding:23px;max-height:90vh;overflow:auto;
+}
+.modal-head{
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:18px;
+}
+.modal-head h2{font-size:19px;margin:0}
+.close{
+  border:0;background:#f1f4f5;border-radius:8px;
+  width:34px;height:34px;font-size:20px;
+}
+.actions{display:flex;gap:8px;flex-wrap:wrap}
+.toast{
+  position:fixed;bottom:20px;left:20px;z-index:200;
+  background:#243746;color:white;padding:13px 18px;
+  border-radius:10px;box-shadow:var(--shadow);max-width:90%;
+}
+.toast.error{background:#b52d3b}
+.mobile-menu{display:none}
+@media(max-width:900px){
+  .sidebar{width:220px}
+  .main{margin-right:220px;width:calc(100% - 220px)}
+  .stats{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:650px){
+  .sidebar{display:none}
+  .sidebar.open{display:block;width:260px;box-shadow:0 0 0 100vw #0005}
+  .main{margin:0;width:100%;padding:15px}
+  .mobile-menu{display:inline-block}
+  .stats{gap:9px}
+  .stat{padding:12px}
+  .stat h3{font-size:21px}
+  .form-grid{grid-template-columns:1fr}
+  .full{grid-column:auto}
+  .topbar h1{font-size:19px}
+}
+</style>
+</head>
+
+<body>
+
+<!-- LOGIN -->
+<section id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">🏥</div>
+    <h1>عيادة الحلواني لطب الأطفال</h1>
+    <p>نظام إدارة العيادة</p>
+
+    <form id="loginForm">
+      <div class="field">
+        <label>البريد الإلكتروني</label>
+        <input id="loginEmail" type="email" required placeholder="name@example.com">
+      </div>
+      <div class="field">
+        <label>كلمة المرور</label>
+        <input id="loginPassword" type="password" required placeholder="كلمة المرور">
+      </div>
+      <button class="btn" id="loginButton" style="width:100%">تسجيل الدخول</button>
+    </form>
+    <p id="loginError" style="color:#dc3545;margin-top:15px"></p>
+  </div>
+</section>
+
+<!-- APP -->
+<div id="app" class="layout hidden">
+
+<aside class="sidebar" id="sidebar">
+  <div class="brand">
+    <div class="brand-icon">🏥</div>
+    <div>
+      <h2>عيادة الحلواني</h2>
+      <small>نظام إدارة العيادة</small>
+    </div>
+  </div>
+
+  <div class="nav-title">القائمة الرئيسية</div>
+  <button class="nav-btn active" data-page="dashboard"><span class="nav-icon">📊</span>لوحة التحكم</button>
+  <button class="nav-btn" data-page="patients"><span class="nav-icon">👶</span>المرضى</button>
+  <button class="nav-btn" data-page="visitors"><span class="nav-icon">👨‍👩‍👧</span>الزوار والمواعيد</button>
+  <button class="nav-btn" data-page="diagnoses"><span class="nav-icon">🩺</span>التشخيصات الطبية</button>
+  <button class="nav-btn admin-only" data-page="diseases"><span class="nav-icon">📋</span>قائمة الأمراض</button>
+
+  <div class="sidebar-bottom">
+    <div class="nav-title">الحساب</div>
+    <div style="padding:10px;font-size:13px">
+      <strong id="sidebarUser">المستخدم</strong>
+      <div id="sidebarRole" style="color:#718096;font-size:12px"></div>
+    </div>
+    <button class="nav-btn" id="logoutButton"><span class="nav-icon">🚪</span>تسجيل الخروج</button>
+  </div>
+</aside>
+
+<main class="main">
+  <header class="topbar">
+    <div>
+      <button class="btn btn-light mobile-menu" id="mobileMenu">☰</button>
+      <h1 id="pageTitle">لوحة التحكم</h1>
+      <p>مرحبًا بك في نظام عيادة الحلواني لطب الأطفال</p>
+    </div>
+    <div class="user-pill">👤 <span id="topUser">المستخدم</span></div>
+  </header>
+
+  <!-- DASHBOARD -->
+  <section class="page active" id="page-dashboard">
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-icon">👶</div>
+        <p>إجمالي المرضى</p><h3 id="statPatients">0</h3>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">👨‍👩‍👧</div>
+        <p>إجمالي الزوار</p><h3 id="statVisitors">0</h3>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">📅</div>
+        <p>زيارات اليوم</p><h3 id="statToday">0</h3>
+      </div>
+      <div class="stat">
+        <div class="stat-icon">🩺</div>
+        <p>التشخيصات</p><h3 id="statDiagnoses">0</h3>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head">
+        <h2>آخر المرضى المسجلين</h2>
+        <button class="btn btn-light btn-small" onclick="showPage('patients')">عرض الكل</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>رقم الملف</th><th>اسم الطفل</th><th>العمر</th><th>رقم الهاتف</th></tr></thead>
+          <tbody id="recentPatients"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="panel">
+      <div class="panel-head"><h2>آخر الزيارات</h2></div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>المريض</th><th>الزائر</th><th>صلة القرابة</th><th>موعد الزيارة</th></tr></thead>
+          <tbody id="recentVisits"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- PATIENTS -->
+  <section class="page" id="page-patients">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>إدارة المرضى</h2>
+        <div class="toolbar">
+          <input class="search" id="patientSearch" placeholder="ابحث باسم المريض أو الهاتف">
+          <button class="btn admin-reception" id="addPatientBtn">+ إضافة مريض</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>رقم الملف</th><th>اسم الطفل</th><th>العمر</th><th>الهاتف</th><th>الغرفة</th><th>تاريخ الدخول</th><th>الإجراء</th></tr>
+          </thead>
+          <tbody id="patientsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- VISITORS -->
+  <section class="page" id="page-visitors">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>الزوار ومواعيد الزيارة</h2>
+        <div class="toolbar">
+          <input class="search" id="visitSearch" placeholder="ابحث باسم الزائر أو المريض">
+          <button class="btn admin-reception" id="addVisitBtn">+ تسجيل زيارة</button>
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>اسم الزائر</th><th>الهاتف</th><th>المريض</th><th>صلة القرابة</th><th>موعد الزيارة</th><th>الحالة</th><th>الإجراء</th></tr>
+          </thead>
+          <tbody id="visitsTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DIAGNOSES -->
+  <section class="page" id="page-diagnoses">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>سجل التشخيصات الطبية</h2>
+        <div class="toolbar">
+          <input class="search" id="diagnosisSearch" placeholder="ابحث باسم المريض أو المرض">
+        </div>
+      </div>
+      <div class="notice">هذه الصفحة تعرض التشخيصات المسجلة في قاعدة البيانات. إضافة التشخيص تتم من زر التشخيص بجوار المريض.</div>
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr><th>اسم المريض</th><th>التشخيص</th><th>تاريخ التشخيص</th><th>ملاحظات الطبيب</th></tr>
+          </thead>
+          <tbody id="diagnosesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- DISEASES -->
+  <section class="page" id="page-diseases">
+    <div class="panel">
+      <div class="panel-head">
+        <h2>قائمة الأمراض</h2>
+        <button class="btn" id="addDiseaseBtn">+ إضافة مرض</button>
+      </div>
+      <div class="table-wrap">
+        <table>
+          <thead><tr><th>اسم المرض</th><th>الوصف</th><th>تاريخ الإضافة</th></tr></thead>
+          <tbody id="diseasesTable"></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<div id="modalRoot"></div>
+<div id="toastRoot"></div>
+
+<script>
+/* بيانات الاتصال بمشروع Supabase الحالي */
+const SUPABASE_URL = "https://fdfojueretxqcwmivhnk.supabase.co";
+const SUPABASE_KEY = "sb_publishable_5vaSmXQq9TSZtHTd9gjjPg_6i0A4ZrF";
+
+const db = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+let currentUser = null;
+let currentProfile = null;
+let patients = [];
+let visitors = [];
+let visits = [];
+let diseases = [];
+let diagnoses = [];
+
+const $ = id => document.getElementById(id);
+
+function escapeHTML(value) {
+  return String(value ?? "").replace(/[&<>"']/g, char => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  })[char]);
+}
+
+function message(text, error=false) {
+  const root = $("toastRoot");
+  root.innerHTML = "";
+  const toast = document.createElement("div");
+  toast.className = "toast" + (error ? " error" : "");
+  toast.textContent = text;
+  root.appendChild(toast);
+  setTimeout(() => toast.remove(), 4000);
+}
+
+function role() {
+  return currentProfile?.role || "";
+}
+function isAdmin() { return role() === "admin"; }
+function isReception() { return role() === "receptionist"; }
+function canManagePatients() { return isAdmin() || isReception(); }
+function canManageVisits() { return isAdmin() || isReception(); }
+function canDiagnose() { return isAdmin() || role() === "doctor"; }
+
+function roleName(value) {
+  return ({
+    admin:"مدير العيادة",
+    doctor:"طبيب",
+    receptionist:"موظف استقبال"
+  })[value] || value;
+}
+
+function showPage(name) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.querySelectorAll(".nav-btn[data-page]").forEach(b => b.classList.remove("active"));
+
+  $("page-" + name)?.classList.add("active");
+  document.querySelector(`.nav-btn[data-page="${name}"]`)?.classList.add("active");
+
+  const titles = {
+    dashboard:"لوحة التحكم",
+    patients:"إدارة المرضى",
+    visitors:"الزوار ومواعيد الزيارة",
+    diagnoses:"التشخيصات الطبية",
+    diseases:"قائمة الأمراض"
+  };
+  $("pageTitle").textContent = titles[name] || "لوحة التحكم";
+  $("sidebar").classList.remove("open");
+}
+
+document.querySelectorAll(".nav-btn[data-page]").forEach(btn => {
+  btn.addEventListener("click", () => showPage(btn.dataset.page));
+});
+
+$("mobileMenu").onclick = () => $("sidebar").classList.toggle("open");
+
+function openModal(title, body) {
+  $("modalRoot").innerHTML = `
+    <div class="modal" id="activeModal">
+      <div class="modal-card">
+        <div class="modal-head">
+          <h2>${title}</h2>
+          <button class="close" onclick="closeModal()">×</button>
+        </div>
+        ${body}
+      </div>
+    </div>`;
+}
+function closeModal() { $("modalRoot").innerHTML = ""; }
+
+async function loadProfile(user) {
+  const { data, error } = await db
+    .from("profiles")
+    .select("id,full_name,role")
+    .eq("id", user.id)
+    .single();
+
+  if (error) throw error;
+  currentProfile = data;
+}
+
+async function enterApp(user) {
+  currentUser = user;
+  await loadProfile(user);
+
+  $("loginScreen").classList.add("hidden");
+  $("app").classList.remove("hidden");
+
+  $("sidebarUser").textContent = currentProfile.full_name;
+  $("topUser").textContent = currentProfile.full_name;
+  $("sidebarRole").textContent = roleName(currentProfile.role);
+
+  document.querySelectorAll(".admin-only").forEach(el => {
+    el.classList.toggle("hidden", !isAdmin());
+  });
+  document.querySelectorAll(".admin-reception").forEach(el => {
+    el.classList.toggle("hidden", !canManagePatients());
+  });
+
+  if (!canDiagnose()) {
+    $("diagnosesTable").closest(".page").querySelector(".notice").textContent =
+      "يمكنك الاطلاع على التشخيصات المسجلة.";
+  }
+
+  await loadAll();
+}
+
+async function login(email, password) {
+  const { data, error } = await db.auth.signInWithPassword({ email, password });
+  if (error) throw error;
+  await enterApp(data.user);
+}
+
+$("loginForm").addEventListener("submit", async e => {
+  e.preventDefault();
+  $("loginButton").disabled = true;
+  $("loginButton").textContent = "جاري الدخول...";
+  $("loginError").textContent = "";
+
+  try {
+    await login($("loginEmail").value.trim(), $("loginPassword").value);
+  } catch (error) {
+    $("loginError").textContent = "تعذر تسجيل الدخول: " + error.message;
+  } finally {
+    $("loginButton").disabled = false;
+    $("loginButton").textContent = "تسجيل الدخول";
+  }
+});
+
+$("logoutButton").onclick = async () => {
+  await db.auth.signOut();
+  currentUser = null;
+  currentProfile = null;
+  $("app").classList.add("hidden");
+  $("loginScreen").classList.remove("hidden");
+  $("loginPassword").value = "";
+};
+
+async function loadAll() {
+  try {
+    const results = await Promise.all([
+      db.from("patients").select("*").order("id", {ascending:false}),
+      db.from("visitors").select("*").order("id", {ascending:false}),
+      db.from("patient_visits").select("*").order("scheduled_at", {ascending:false}),
+      db.from("diseases").select("*").order("name"),
+      db.from("patient_diagnoses").select("*").order("diagnosed_at", {ascending:false})
+    ]);
+
+    const names = ["المرضى","الزوار","الزيارات","الأمراض","التشخيصات"];
+    for (let i=0; i<results.length; i++) {
+      if (results[i].error) {
+        throw new Error("تعذر تحميل " + names[i] + ": " + results[i].error.message);
+      }
+    }
+
+    patients = results[0].data || [];
+    visitors = results[1].data || [];
+    visits = results[2].data || [];
+    diseases = results[3].data || [];
+    diagnoses = results[4].data || [];
+
+    renderAll();
+  } catch (error) {
+    console.error(error);
+    message(error.message, true);
+  }
+}
+
+function patientName(id) {
+  return patients.find(p => Number(p.id) === Number(id))?.full_name || "غير معروف";
+}
+function visitorName(id) {
+  return visitors.find(v => Number(v.id) === Number(id))?.full_name || "غير معروف";
+}
+function diseaseName(id) {
+  return diseases.find(d => Number(d.id) === Number(id))?.name || "غير معروف";
+}
+function dateText(value) {
+  if (!value) return "—";
+  const d = new Date(value);
+  if (Number.isNaN(d.getTime())) return escapeHTML(value);
+  return d.toLocaleString("ar-EG");
+}
+
+function renderAll() {
+  $("statPatients").textContent = patients.length;
+  $("statVisitors").textContent = visitors.length;
+  $("statDiagnoses").textContent = diagnoses.length;
+
+  const today = new Date().toISOString().slice(0,10);
+  $("statToday").textContent = visits.filter(v =>
+    String(v.scheduled_at || "").slice(0,10) === today
+  ).length;
+
+  renderPatients();
+  renderVisits();
+  renderDiagnoses();
+  renderDiseases();
+  renderDashboard();
+}
+
+function renderDashboard() {
+  $("recentPatients").innerHTML = patients.slice(0,5).map(p => `
+    <tr>
+      <td>${escapeHTML(p.medical_record_no || p.id)}</td>
+      <td>${escapeHTML(p.full_name)}</td>
+      <td>${escapeHTML(p.age ?? "—")}</td>
+      <td>${escapeHTML(p.phone || "—")}</td>
+    </tr>`).join("") || `<tr><td colspan="4" class="empty">لا يوجد مرضى بعد</td></tr>`;
+
+  $("recentVisits").innerHTML = visits.slice(0,5).map(v => `
+    <tr>
+      <td>${escapeHTML(patientName(v.patient_id))}</td>
+      <td>${escapeHTML(visitorName(v.visitor_id))}</td>
+      <td>${escapeHTML(v.relationship || "—")}</td>
+      <td>${dateText(v.scheduled_at)}</td>
+    </tr>`).join("") || `<tr><td colspan="4" class="empty">لا توجد زيارات بعد</td></tr>`;
+}
+
+function renderPatients(filter="") {
+  const q = filter.trim().toLowerCase();
+  const rows = patients.filter(p =>
+    String(p.full_name || "").toLowerCase().includes(q) ||
+    String(p.phone || "").toLowerCase().includes(q)
+  );
+
+  $("patientsTable").innerHTML = rows.map(p => `
+    <tr>
+      <td>${escapeHTML(p.medical_record_no || p.id)}</td>
+      <td><strong>${escapeHTML(p.full_name)}</strong></td>
+      <td>${escapeHTML(p.age ?? "—")}</td>
+      <td>${escapeHTML(p.phone || "—")}</td>
+      <td>${escapeHTML(p.room || "—")}</td>
+      <td>${escapeHTML(p.admission_date || "—")}</td>
+      <td>
+        <div class="actions">
+          ${canDiagnose() ? `<button class="btn btn-small" onclick="addDiagnosis(${Number(p.id)})">🩺 تشخيص</button>` : ""}
+        </div>
+      </td>
+    </tr>`).join("") || `<tr><td colspan="7" class="empty">لا توجد نتائج</td></tr>`;
+}
+
+function renderVisits(filter="") {
+  const q = filter.trim().toLowerCase();
+  const rows = visits.filter(v =>
+    patientName(v.patient_id).toLowerCase().includes(q) ||
+    visitorName(v.visitor_id).toLowerCase().includes(q)
+  );
+
+  $("visitsTable").innerHTML = rows.map(v => `
+    <tr>
+      <td>${escapeHTML(visitorName(v.visitor_id))}</td>
+      <td>${escapeHTML(visitors.find(x=>Number(x.id)===Number(v.visitor_id))?.phone || "—")}</td>
+      <td>${escapeHTML(patientName(v.patient_id))}</td>
+      <td>${escapeHTML(v.relationship || "—")}</td>
+      <td>${dateText(v.scheduled_at)}</td>
+      <td><span class="tag">${escapeHTML(v.status || "scheduled")}</span></td>
+      <td>${canManageVisits() ? `<button class="btn btn-danger btn-small" onclick="deleteVisit(${Number(v.id)})">حذف</button>` : "—"}</td>
+    </tr>`).join("") || `<tr><td colspan="7" class="empty">لا توجد زيارات</td></tr>`;
+}
+
+function renderDiagnoses(filter="") {
+  const q = filter.trim().toLowerCase();
+  const rows = diagnoses.filter(d =>
+    patientName(d.patient_id).toLowerCase().includes(q) ||
+    diseaseName(d.disease_id).toLowerCase().includes(q) ||
+    String(d.notes || "").toLowerCase().includes(q)
+  );
+
+  $("diagnosesTable").innerHTML = rows.map(d => `
+    <tr>
+      <td>${escapeHTML(patientName(d.patient_id))}</td>
+      <td><span class="tag">${escapeHTML(diseaseName(d.disease_id))}</span></td>
+      <td>${escapeHTML(d.diagnosed_at || "—")}</td>
+      <td>${escapeHTML(d.notes || "—")}</td>
+    </tr>`).join("") || `<tr><td colspan="4" class="empty">لا توجد تشخيصات مسجلة</td></tr>`;
+}
+
+function renderDiseases() {
+  $("diseasesTable").innerHTML = diseases.map(d => `
+    <tr>
+      <td>${escapeHTML(d.name)}</td>
+      <td>${escapeHTML(d.description || "—")}</td>
+      <td>${dateText(d.created_at)}</td>
+    </tr>`).join("") || `<tr><td colspan="3" class="empty">لا توجد أمراض مسجلة</td></tr>`;
+}
+
+/* إضافة مريض */
+$("addPatientBtn").onclick = () => {
+  if (!canManagePatients()) return message("ليس لديك صلاحية.", true);
+
+  openModal("إضافة مريض جديد", `
+    <form id="patientForm">
+      <div class="form-grid">
+        <div class="field full"><label>اسم الطفل *</label><input name="full_name" required></div>
+        <div class="field"><label>العمر</label><input name="age" type="number" min="0"></div>
+        <div class="field"><label>رقم الهاتف</label><input name="phone" type="tel"></div>
+        <div class="field"><label>الغرفة</label><input name="room"></div>
+        <div class="field"><label>تاريخ الدخول</label><input name="admission_date" type="date"></div>
+        <div class="field full"><label>العنوان</label><input name="address"></div>
+        <div class="field full"><label>ملاحظات</label><textarea name="notes" rows="3"></textarea></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:18px">حفظ المريض</button>
+    </form>`);
+
+  $("patientForm").onsubmit = savePatient;
+};
+
+async function savePatient(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+  const payload = {
+    full_name:f.get("full_name").trim(),
+    age:f.get("age") ? Number(f.get("age")) : null,
+    phone:f.get("phone").trim() || null,
+    room:f.get("room").trim() || null,
+    admission_date:f.get("admission_date") || null,
+    address:f.get("address").trim() || null,
+    notes:f.get("notes").trim() || null,
+    created_by:currentUser.id
+  };
+
+  const {error} = await db.from("patients").insert(payload);
+  if (error) return message("تعذر حفظ المريض: " + error.message, true);
+
+  closeModal();
+  message("تمت إضافة المريض بنجاح");
+  await loadAll();
+}
+
+/* إضافة زيارة وزائر */
+$("addVisitBtn").onclick = () => {
+  if (!canManageVisits()) return message("ليس لديك صلاحية.", true);
+  if (!patients.length) return message("أضف مريضًا أولًا.", true);
+
+  openModal("تسجيل زائر وموعد زيارة", `
+    <form id="visitForm">
+      <div class="form-grid">
+        <div class="field full"><label>اسم الزائر *</label><input name="visitor_name" required></div>
+        <div class="field"><label>رقم الهاتف</label><input name="phone" type="tel"></div>
+        <div class="field"><label>المريض *</label>
+          <select name="patient_id" required>
+            <option value="">اختر المريض</option>
+            ${patients.map(p=>`<option value="${p.id}">${escapeHTML(p.full_name)}</option>`).join("")}
+          </select>
+        </div>
+        <div class="field"><label>صلة القرابة</label><input name="relationship" placeholder="الأب، الأم..."></div>
+        <div class="field"><label>موعد الزيارة *</label><input name="scheduled_at" type="datetime-local" required></div>
+        <div class="field full"><label>ملاحظات</label><textarea name="notes" rows="3"></textarea></div>
+      </div>
+      <button class="btn" style="width:100%;margin-top:18px">حفظ الزيارة</button>
+    </form>`);
+
+  $("visitForm").onsubmit = saveVisit;
+};
+
+async function saveVisit(e) {
+  e.preventDefault();
+  const f = new FormData(e.target);
+
+  const {data:visitor, error:visitorError} = await db
+    .from("visitors")
+    .insert({
+      full_name:f.get("visitor_name").trim(),
+      phone:f.get("phone").trim() || null
+    })
+    .select("id")
+    .single();
+
+  if (visitorError) return message("تعذر حفظ الزائر: " + visitorError.message, true);
+
+  const {error:visitError} = await db.from("patient_visits").insert({
+    patient_id:Number(f.get("patient_id")),
+    visitor_id:visitor.id,
+    relationship:f.get("relationship").trim() || null,
+    scheduled_at:new Date(f.get("scheduled_at")).toISOString(),
+    notes:f.get("notes").trim() || null,
+    status:"scheduled",
+    created_by:currentUser.id
+  });
+
+  if (visitError) {
+    message("تم حفظ الزائر، لكن تعذر حفظ الزيارة: " + visitError.message, true);
+    await loadAll();
+    return;
+  }
+
+  closeModal();
+  message("تم تسجيل الزائر والزيارة بنجاح");
+  await loadAll();
+}
+
+async function deleteVisit(id) {
+  if (!canManageVisits()) return message("ليس لديك صلاحية.", true);
+  if (!confirm("هل تريد حذف هذه الزيارة؟")) return;
+
+  const {error} = await db.from("patient_visits").delete().eq("id", id);
+  if (error) return message("تعذر حذف الزيارة: " + error.message, true);
+
+  message("تم حذف الزيارة");
+  await loadAll();
+}
+
+/* نافذة إضافة تشخيص */
+async function addDiagnosis(patientId) {
+  if (!canDiagnose()) return message("ليس لديك صلاحية إضافة التشخيص.", true);
+  if (!diseases.length) return message("لا توجد أنواع أمراض مسجلة بعد.", true);
+
+  openModal("إضافة تشخيص طبي", `
+    <form id="diagnosisForm">
+      <div class="field">
+        <label>المريض</label>
+        <input value="${escapeHTML(patientName(patientId))}" disabled>
+      </div>
+      <div class="field">
+        <label>اختر المرض *</label>
+        <select name="disease_id" required>
+          <option value="">اختر المرض</option>
+          ${diseases.map(d=>`<option value="${d.id}">${escapeHTML(d.name)}</option>`).join("")}
+        </select>
+      </div>
+      <div class="field">
+        <label>ملاحظات الطبيب</label>
+        <textarea name="notes" rows="4" placeholder="ملاحظات التشخيص (اختياري)"></textarea>
+      </div>
+      <button class="btn" style="width:100%">حفظ التشخيص</button>
+    </form>`);
+
+  $("diagnosisForm").onsubmit = async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+    const {error} = await db.from("patient_diagnoses").insert({
+      patient_id:Number(patientId),
+      disease_id:Number(f.get("disease_id")),
+      diagnosed_by:currentUser.id,
+      notes:f.get("notes").trim() || null
+    });
+
+    if (error) return message("تعذر حفظ التشخيص: " + error.message, true);
+
+    closeModal();
+    message("تم حفظ التشخيص بنجاح");
+    await loadAll();
+    showPage("diagnoses");
+  };
+}
+
+/* إضافة مرض */
+$("addDiseaseBtn").onclick = () => {
+  if (!isAdmin()) return message("هذه الوظيفة للمدير فقط.", true);
+
+  openModal("إضافة مرض جديد", `
+    <form id="diseaseForm">
+      <div class="field"><label>اسم المرض *</label><input name="name" required></div>
+      <div class="field"><label>الوصف</label><textarea name="description" rows="3"></textarea></div>
+      <button class="btn" style="width:100%">حفظ المرض</button>
+    </form>`);
+
+  $("diseaseForm").onsubmit = async e => {
+    e.preventDefault();
+    const f = new FormData(e.target);
+
+    const {error} = await db.from("diseases").insert({
+      name:f.get("name").trim(),
+      description:f.get("description").trim() || null
+    });
+
+    if (error) return message("تعذر حفظ المرض: " + error.message, true);
+
+    closeModal();
+    message("تمت إضافة المرض");
+    await loadAll();
+  };
+};
+
+/* البحث */
+$("patientSearch").addEventListener("input", e => renderPatients(e.target.value));
+$("visitSearch").addEventListener("input", e => renderVisits(e.target.value));
+$("diagnosisSearch").addEventListener("input", e => renderDiagnoses(e.target.value));
+
+/* استعادة الجلسة */
+(async function init() {
+  const {data:{session}, error} = await db.auth.getSession();
+  if (error) {
+    console.error(error);
+    return;
+  }
+
+  if (session?.user) {
+    try {
+      await enterApp(session.user);
+    } catch (error) {
+      console.error(error);
+      await db.auth.signOut();
+      $("loginError").textContent = "تعذر تحميل بيانات الحساب: " + error.message;
+    }
+  }
+})();
+</script>
+</body>
+</html>
